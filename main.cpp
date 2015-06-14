@@ -2,6 +2,20 @@
 
 using namespace std;
 
+void swapNumbers(int& number1, int& number2) {
+    //cout << "Swapping " << number1 << " with " << number2 << endl;
+    number1 += number2;
+    number2 = number1 - number2;
+    number1 -= number2;
+}
+
+void printList(int* largestNumbersArray, int size) {
+    for(int i = 0; i < size; i++) {
+        cout << "|" << largestNumbersArray[i] << "|";
+    }
+    cout << endl;
+}
+
 int main() {
     char* buffer;
     FILE* f = fopen("sample.txt", "r");
@@ -22,48 +36,64 @@ int main() {
     cout << buffer << endl;
 
     cout << "Parsed numbers: " << endl;
-    char* tok = strtok(buffer, " ");
+    char* tok = strtok(buffer, " \n");
     bool firstRun = true;
     int N = 0;
-    int* nLargestNumbers;
-    int *tail, *currentPtr;
-    int* currentLargestPtr;
+    int listSize = 0;
+    int* numberList;
+    int *head, *tail, *currentHead;
+    char c;
     while(tok != NULL) {
-        long int currentNum = strtol(tok, NULL, 10);
+        int currentNum = strtol(tok, NULL, 10);
         if(currentNum != 0 || (currentNum == 0 && tok[0] == '0')) {
+            cout << currentNum << " ";
             if(firstRun) {
-                N = currentNum;
+                N = currentNum > 0 ? currentNum : 0;
                 firstRun = false;
 
-                nLargestNumbers = (int*)malloc(N * sizeof(int));
-                currentPtr = nLargestNumbers;
-                tail = nLargestNumbers + N - 1;
-                currentLargestPtr = nLargestNumbers;
-            }
+                numberList = (int*)calloc(sizeof(int), N);
+                head = numberList;
+                tail = numberList + N - 1;
 
-            if(currentNum >= *currentLargestPtr) {
-                *currentPtr = currentNum;
-                if(currentPtr == tail) {
-                    currentPtr = nLargestNumbers;
-                } else {
-                    currentPtr++;
+                currentHead = tail;
+                *currentHead = currentNum;
+                //printList(numberList, N);
+            } else {
+                bool numberInserted = false;
+                for(int* i = tail; i >= currentHead; i--) {
+                    if(currentNum > *i) {
+                        int* lastElement = currentHead-1 >= head ? currentHead-1 : head;
+                        for(int* j = lastElement; j < i; j++) {
+                            swapNumbers(*j, *(j+1));
+                            //printList(numberList, N);
+                        }
+                        //cout << "Inserting " << currentNum << "..." << endl;
+                        numberInserted = true;
+                        *i = currentNum;
+                        if(currentHead-1 >= head) {
+                            currentHead--;
+                        }
+                        //printList(numberList, N);
+                        break;
+                    }
+                }
+                if(!numberInserted && currentHead > head) {
+                    //cout << "lnserting " << currentNum << " at head of queue" << endl;
+                    *(--currentHead) = currentNum;
+                    //printList(numberList, N);
                 }
             }
-            cout << currentNum << " ";
         }
-        tok = strtok(NULL, " ");
-    }
-
-    cout << endl;
-
-    for(int i = 0; i < N; i++) {
-        cout << nLargestNumbers[i] << " ";
+        tok = strtok(NULL, " \n");
     }
     cout << endl;
+    cout << "Size: " << tail-currentHead+1 << endl << endl;
 
-    free(nLargestNumbers);
+    printList(numberList, N);
+
+    free(numberList);
     free(buffer);
-    nLargestNumbers = NULL;
+    numberList = NULL;
     buffer = NULL;
 
     return 0;
