@@ -60,6 +60,7 @@ int main() {
                 //printList(numberList, N);
             } else {
                 bool numberInserted = false;
+                bool isDuplicate = false;
                 for(int* i = tail; i >= currentHead; i--) {
                     if(currentNum > *i) {
                         int* lastElement = currentHead-1 >= head ? currentHead-1 : head;
@@ -75,9 +76,12 @@ int main() {
                         }
                         //printList(numberList, N);
                         break;
+                    } else if(currentNum == *i) {
+                        isDuplicate = true;
+                        break;
                     }
                 }
-                if(!numberInserted && currentHead > head) {
+                if(!numberInserted && !isDuplicate && currentHead > head) {
                     //cout << "lnserting " << currentNum << " at head of queue" << endl;
                     *(--currentHead) = currentNum;
                     //printList(numberList, N);
